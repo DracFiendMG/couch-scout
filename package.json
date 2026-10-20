@@ -1,0 +1,47 @@
+{
+  "name": "couch-scout",
+  "version": "1.0.0",
+  "description": "Autonomous Sloth Deal & Bureaucracy Hunter powered by Gemma, Stagehand, Temporal, and Sentry",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "worker": "tsx src/workflows/worker.ts",
+    "test": "tsx test/run-tests.ts"
+  },
+  "keywords": [
+    "autonomous-agent",
+    "gemma",
+    "stagehand",
+    "browserbase",
+    "temporal",
+    "sentry",
+    "hacktoberfest"
+  ],
+  "author": "DracFiendMG",
+  "license": "MIT",
+  "dependencies": {
+    "@browserbasehq/stagehand": "^4.3.0",
+    "@sentry/node": "^9.1.0",
+    "@temporalio/activity": "^1.24.0",
+    "@temporalio/client": "^1.24.0",
+    "@temporalio/worker": "^1.24.0",
+    "@temporalio/workflow": "^1.24.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "playwright": "^1.50.1",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.13.4",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

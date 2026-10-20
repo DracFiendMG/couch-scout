@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CouchScout | Autonomous Sloth Deal & Bureaucracy Hunter</title>
+  <meta name="description" content="Stay on the couch. CouchScout uses Gemma AI, Stagehand, Temporal, and Sentry to hunt the web's deepest discounts while you relax.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-mascot">🦥</div>
+        <div class="brand-text">
+          <span class="brand-title">CouchScout</span>
+          <span class="brand-badge">Slow &amp; Steady Edition</span>
+        </div>
+      </div>
+
+      <!-- Real-time Integration Status Badges -->
+      <div class="tech-status-pills" id="tech-status-pills">
+        <div class="status-pill" id="pill-gemma" title="Gemma Open-Weight AI Brain">
+          <span class="pill-dot active"></span>
+          <span class="pill-label">Gemma 2</span>
+        </div>
+        <div class="status-pill" id="pill-stagehand" title="Stagehand &amp; Browserbase Automation">
+          <span class="pill-dot active"></span>
+          <span class="pill-label">Stagehand</span>
+        </div>
+        <div class="status-pill" id="pill-temporal" title="Temporal Durable Workflow Execution">
+          <span class="pill-dot active"></span>
+          <span class="pill-label">Temporal</span>
+        </div>
+        <div class="status-pill" id="pill-sentry" title="Sentry Agent Tracing &amp; Observability">
+          <span class="pill-dot active"></span>
+          <span class="pill-label">Sentry Traced</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Wrapper -->
+  <main class="main-container">
+    
+    <!-- Hero / Headline Section -->
+    <section class="hero-section">
+      <div class="sloth-day-tag">
+        <span class="sloth-icon">🌿</span>
+        <span>Celebrating International Sloth Day &bull; Hacktoberfest 2026</span>
+      </div>
+      <h1 class="hero-title">
+        Stay on the Couch.<br>
+        <span class="gradient-text">Let the Sloth Scout the Deals.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Eliminate the tedious cognitive chore of cross-checking retail websites, hunting coupons, and dodging price traps. Powered by <strong>Gemma 2</strong>, orchestrated by <strong>Stagehand</strong>, made resilient with <strong>Temporal</strong>, and monitored with <strong>Sentry</strong>.
+      </p>
+
+      <!-- Search Input Container -->
+      <div class="search-box-card">
+        <form id="search-form" class="search-form">
+          <div class="search-input-wrapper">
+            <span class="search-icon">🔍</span>
+            <input 
+              type="text" 
+              id="search-input" 
+              name="query" 
+              placeholder="e.g. Mechanical keyboard with hot-swappable switches under $70" 
+              autocomplete="off" 
+              required
+            >
+          </div>
+          <button type="submit" id="search-submit-btn" class="hunt-button">
+            <span class="btn-text">Hunt Deals</span>
+            <span class="btn-icon">🦥</span>
+          </button>
+        </form>
+
+        <!-- Quick Prompt Chips -->
+        <div class="quick-prompts">
+          <span class="prompts-label">Try asking:</span>
+          <button type="button" class="prompt-chip" data-query="Mechanical keyboard with hot-swappable switches under $70">⌨️ Hot-swap keyboard under $70</button>
+          <button type="button" class="prompt-chip" data-query="Sony WH-1000XM5 wireless noise cancelling headphones">🎧 Sony WH-1000XM5 headphones</button>
+          <button type="button" class="prompt-chip" data-query="Ergonomic mesh office chair with lumbar support">🪑 Ergonomic office chair</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Agent Mission Progress Section -->
+    <section id="mission-section" class="mission-section hidden">
+      <div class="section-header">
+        <div class="sloth-avatar-wrapper">
+          <div class="sloth-avatar" id="sloth-avatar">🦥</div>
+          <div class="sloth-status-pulse"></div>
+        </div>
+        <div class="mission-info">
+          <div class="mission-status-line">
+            <span class="mission-tag">Autonomous Mission Active</span>
+            <span class="mission-elapsed" id="mission-timer">00:00</span>
+          </div>
+          <h2 class="mission-message" id="live-mission-message">Waking up CouchScout sloth agent...</h2>
+        </div>
+      </div>
+
+      <!-- Live Agent SSE Steps Timeline -->
+      <div class="steps-container" id="steps-container">
+        <!-- Steps dynamically populated via SSE -->
+      </div>
+    </section>
+
+    <!-- "The Lazy Payoff" Scoreboard Section -->
+    <section id="payoff-section" class="payoff-section hidden">
+      <div class="payoff-banner">
+        <div class="payoff-title-group">
+          <h2 class="payoff-headline">The Sloth Payoff Scoreboard</h2>
+          <p class="payoff-sub">Quantified proof that resting on the couch is mathematically superior.</p>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon">⏱️</div>
+          <div class="metric-content">
+            <div class="metric-value" id="metric-minutes">0</div>
+            <div class="metric-unit">Minutes Saved</div>
+            <p class="metric-desc">Manual browsing, filter clicking, &amp; price sorting bypassed.</p>
+          </div>
+        </div>
+
+        <div class="metric-card highlight-metric">
+          <div class="metric-icon">💵</div>
+          <div class="metric-content">
+            <div class="metric-value">$<span id="metric-dollars">0.00</span></div>
+            <div class="metric-unit">Cold Cash Saved</div>
+            <p class="metric-desc">Discount &amp; coupon arbitrage vs highest retail MSRP.</p>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon">🗂️</div>
+          <div class="metric-content">
+            <div class="metric-value" id="metric-tabs">0</div>
+            <div class="metric-unit">Tabs Avoided</div>
+            <p class="metric-desc">Browser clutter &amp; cognitive overload permanently dodged.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gemma AI Verdict Callout -->
+    <section id="verdict-section" class="verdict-section hidden">
+      <div class="verdict-card">
+        <div class="verdict-header">
+          <div class="verdict-badge">
+            <span class="sparkle">✨</span>
+            <span>Gemma 2 Sloth Verdict</span>
+          </div>
+          <div class="verdict-model-tag">Google Gemma Open-Weight Model</div>
+        </div>
+        <h3 class="verdict-summary" id="verdict-summary">Evaluating candidate listings...</h3>
+        <p class="verdict-text" id="verdict-text"></p>
+      </div>
+    </section>
+
+    <!-- Verified Deal Cards Results Grid -->
+    <section id="results-section" class="results-section hidden">
+      <div class="results-header">
+        <h2 class="results-title">Verified Scouted Deals</h2>
+        <span class="results-count" id="results-count">0 Offers Found</span>
+      </div>
+
+      <div class="deals-grid" id="deals-grid">
+        <!-- Deal Cards dynamically inserted here -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer with Hacktoberfest 2026 Partner Stacks -->
+  <footer class="app-footer">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="footer-logo">🦥 CouchScout</span>
+          <p class="footer-tagline">Engineered for Hacktoberfest 2026 Week 3 &bull; Stacking 6 Partner Prize Categories</p>
+        </div>
+        
+        <div class="partner-badges">
+          <span class="partner-tag">Google Gemma</span>
+          <span class="partner-tag">Browserbase &amp; Stagehand</span>
+          <span class="partner-tag">Temporal Workflows</span>
+          <span class="partner-tag">Sentry Tracing</span>
+          <span class="partner-tag">Render Cloud</span>
+          <span class="partner-tag">.tech Domains</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2026 CouchScout. Open source under MIT License. Keep calm and stay on the couch.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Client Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>
