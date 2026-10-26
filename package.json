@@ -18,7 +18,8 @@
     "browserbase",
     "temporal",
     "sentry",
-    "hacktoberfest"
+    "deal-hunter",
+    "shopping-agent"
   ],
   "author": "DracFiendMG",
   "license": "MIT",

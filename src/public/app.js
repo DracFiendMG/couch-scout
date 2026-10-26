@@ -4,7 +4,8 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  const sessionId = 'session-' + Math.random().toString(36).substring(2, 9);
+  let currentSessionId = null;
+  let isCurrentHuntRendered = false;
   let eventSource = null;
   let timerInterval = null;
   let startTime = null;
@@ -61,6 +62,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // 4. Direct button click handler to guarantee submission
+  if (searchSubmitBtn) {
+    searchSubmitBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const query = searchInput.value.trim();
+      if (query) {
+        startHunt(query);
+      }
+    });
+  }
+
   /**
    * Check backend health and update status pills
    */
@@ -93,7 +105,19 @@ document.addEventListener('DOMContentLoaded', () => {
    * Main deal hunting execution
    */
   async function startHunt(query) {
-    // Reset UI state
+    // Cleanly terminate any active SSE connection from previous hunts
+    if (eventSource) {
+      try {
+        eventSource.close();
+      } catch (_) {}
+      eventSource = null;
+    }
+
+    // Generate unique session identifier for this hunt
+    currentSessionId = 'hunt-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7);
+    isCurrentHuntRendered = false;
+
+    // Reset UI state and immediately hide previous search results
     searchSubmitBtn.disabled = true;
     missionSection.classList.remove('hidden');
     payoffSection.classList.add('hidden');
@@ -101,6 +125,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resultsSection.classList.add('hidden');
     stepsContainer.innerHTML = '';
     dealsGrid.innerHTML = '';
+    slothAvatar.textContent = '🦥';
+    missionMessage.textContent = `Waking up CouchScout sloth agent for "${query}"...`;
 
     // Scroll to mission section smoothly
     missionSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -111,22 +137,30 @@ document.addEventListener('DOMContentLoaded', () => {
     timerInterval = setInterval(updateTimer, 1000);
     updateTimer();
 
-    // Setup SSE Stream
-    setupEventSource();
+    // Setup SSE Stream for real-time progress updates
+    setupEventSource(currentSessionId);
 
-    // Trigger Hunt Request
+    // Trigger Hunt Request to backend
     try {
       const res = await fetch('/api/hunt', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, sessionId }),
+        body: JSON.stringify({ query, sessionId: currentSessionId }),
       });
 
       if (!res.ok) {
         throw new Error('Failed to start hunt.');
       }
+
+      const data = await res.json();
+
+      // If backend returned completed results directly and SSE hasn't rendered it yet:
+      if (data.status === 'completed' && data.result && !isCurrentHuntRendered) {
+        isCurrentHuntRendered = true;
+        handleCompleteEvent(data.result);
+      }
     } catch (err) {
-      addStepItem('Error', err.message, 'warning');
+      addStepItem('Notice', err.message || 'Issue handled gracefully.', 'warning');
       searchSubmitBtn.disabled = false;
       clearInterval(timerInterval);
     }
@@ -135,21 +169,36 @@ document.addEventListener('DOMContentLoaded', () => {
   /**
    * Establish Server-Sent Events listener
    */
-  function setupEventSource() {
+  function setupEventSource(huntSessionId) {
     if (eventSource) {
-      eventSource.close();
+      try {
+        eventSource.close();
+      } catch (_) {}
+      eventSource = null;
     }
 
-    eventSource = new EventSource(`/api/hunt/stream?sessionId=${sessionId}`);
+    eventSource = new EventSource(`/api/hunt/stream?sessionId=${huntSessionId}`);
 
     eventSource.onmessage = (event) => {
       try {
         const payload = JSON.parse(event.data);
 
+        // Ignore stale messages from any previous hunt session
+        if (payload.sessionId && payload.sessionId !== currentSessionId) {
+          return;
+        }
+
         if (payload.type === 'PROGRESS') {
           handleProgressEvent(payload);
         } else if (payload.type === 'COMPLETE') {
-          handleCompleteEvent(payload.result);
+          if (!isCurrentHuntRendered) {
+            isCurrentHuntRendered = true;
+            handleCompleteEvent(payload.result);
+          }
+          if (eventSource) {
+            eventSource.close();
+            eventSource = null;
+          }
         } else if (payload.type === 'ERROR') {
           handleErrorEvent(payload.error);
         }
@@ -159,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     eventSource.onerror = () => {
-      console.warn('SSE connection closed or lost.');
+      console.warn('SSE connection closed or streaming finished.');
     };
   }
 
@@ -209,7 +258,10 @@ document.addEventListener('DOMContentLoaded', () => {
     missionMessage.textContent = 'Mission Complete! Grab your couch blanket and review the finds.';
 
     if (eventSource) {
-      eventSource.close();
+      try {
+        eventSource.close();
+      } catch (_) {}
+      eventSource = null;
     }
 
     const { evaluation, deals } = result;

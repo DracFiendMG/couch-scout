@@ -1,7 +1,7 @@
 # 🦥 CouchScout
 
 **Autonomous Sloth Deal & Bureaucracy Hunter**  
-*Built for Hacktoberfest 2026 Week 3 — "Slow and Steady" (International Sloth Day)*
+*Stay on the couch. Let autonomous agents handle the repetitive browsing grind.*
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Gemma 2](https://img.shields.io/badge/AI%20Brain-Google%20Gemma%202-4285F4?logo=google)](https://ai.google.dev/gemma)
@@ -66,19 +66,17 @@ CouchScout will:
 
 ---
 
-## 🏆 Hacktoberfest Prize Stacking
+## 🛠️ Core Technology Stack
 
-CouchScout is intentionally architected to compete in **6 partner prize categories** ($1,050 USD total value):
+CouchScout integrates modern open-source tooling and resilient infrastructure into a unified autonomous pipeline:
 
-| Partner Track | Prize | How CouchScout Qualifies |
+| Technology | Role in CouchScout | Key Benefit |
 | :--- | :--- | :--- |
-| **Top Overall Prize** | **$250 USD** + DEV++ | Production-ready, witty, deeply polished project embodying the "Slow and Steady" sloth theme. |
-| **Best Use of Gemma** | **$200 USD** | Open-weight Google Gemma 2 powers search planning, DOM reasoning, and deal synthesis. |
-| **Best Use of Render** | **$200 USD** | Includes `render.yaml` and `Dockerfile` for zero-configuration cloud hosting. |
-| **Best Use of Browserbase** | **$100 USD** | Uses `@browserbasehq/stagehand` for autonomous multi-retailer browser navigation. |
-| **Best Use of Temporal** | **$100 USD** | Temporal durable execution handles multi-site retry policies and periodic price-drop alerts. |
-| **Best Use of Sentry Agent Tracing** | **$100 USD** | Custom OpenTelemetry spans track LLM token counts, browser steps, and activity timings. |
-| **Best Use of a .tech Domain** | **$100 USD** | Deployed with production DNS under a `.tech` domain (e.g. `couchscout.tech`). |
+| **Google Gemma 2** | Open-weight AI Brain | Runs locally (Ollama) or private cloud; handles intent decomposition and deal evaluation without proprietary lock-in. |
+| **Browserbase & Stagehand** | Autonomous Web Exploration | Connects to remote/local browsers to inspect dynamic retail pages (`.act()`, `.observe()`, `.extract()`). |
+| **Temporal Workflows** | Durable Execution Engine | Guarantees multi-step browser tasks and price alerts survive network dropouts and browser crashes. |
+| **Sentry Agent Tracing** | Full Observability | Instruments agent execution spans, latency measurements, and LLM token usage across the entire pipeline. |
+| **Render Cloud & Docker** | Cloud Deployment | Zero-configuration deployment with `render.yaml` and production Docker container. |
 
 ---
 
@@ -97,9 +95,9 @@ cp .env.example .env
 ```
 *(CouchScout includes intelligent fallbacks and sandbox test generators — it works immediately out of the box even before adding external API keys!)*
 
-To enable live partner integrations:
+To enable optional cloud/live integrations:
 - **Gemma**: Start Ollama locally (`ollama run gemma2:9b`) or provide a Groq/Google AI Studio key in `GEMMA_API_KEY`.
-- **Browserbase**: Add your `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID`.
+- **Browserbase**: Add your `BROWSERBASE_API_KEY` and `BROWSERBASE_PROJECT_ID` for cloud browser execution.
 - **Sentry**: Add your `SENTRY_DSN` for real-time span tracing.
 - **Temporal**: Set `TEMPORAL_ENABLED=true` to connect to a local or cloud Temporal cluster.
 
@@ -124,7 +122,7 @@ couch-scout/
 ├── render.yaml               # 1-Click Render Cloud deployment
 ├── Dockerfile                # Production Docker container definition
 ├── docs/
-│   └── dev-to-submission-draft.md # Ready-to-publish DEV.to Week 3 submission post
+│   └── architecture.md       # Detailed technical architecture guide
 ├── src/
 │   ├── config.ts             # Strongly-typed environment configuration
 │   ├── sentry.ts             # Sentry Agent Tracing & Span metrics
@@ -150,6 +148,18 @@ couch-scout/
 
 ---
 
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
 ## 📜 License
 
-MIT License &copy; 2026 DracFiendMG. Built with 💚 for Hacktoberfest 2026. Keep calm and stay on the couch.
+MIT License &copy; 2026 DracFiendMG. Built with 💚 for open-source AI automation. Keep calm and stay on the couch.

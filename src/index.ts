@@ -19,12 +19,28 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Prevent browser from caching static assets in development mode
+app.use((_req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
+
 // Serve static frontend assets (robust path for both dev tsx and dist production)
 let publicPath = path.join(__dirname, 'public');
 if (!fs.existsSync(publicPath)) {
   publicPath = path.join(process.cwd(), 'src', 'public');
 }
-app.use(express.static(publicPath));
+app.use(express.static(publicPath, {
+  etag: false,
+  maxAge: 0,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  },
+}));
 
 // In-memory active hunt sessions for SSE streaming
 const activeSessions = new Map<
@@ -75,7 +91,7 @@ app.get('/api/hunt/stream', (req: Request, res: Response) => {
   const sessionId = (req.query.sessionId as string) || 'default';
 
   res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
@@ -88,13 +104,21 @@ app.get('/api/hunt/stream', (req: Request, res: Response) => {
   // Send initial connected ping
   res.write(`data: ${JSON.stringify({ type: 'CONNECTED', sessionId })}\n\n`);
 
-  // Send any existing history
+  // Replay existing steps for this session if reconnecting
   for (const item of session.history) {
     res.write(`data: ${JSON.stringify(item)}\n\n`);
   }
 
   const listener = (data: any) => {
     res.write(`data: ${JSON.stringify(data)}\n\n`);
+    // Gracefully finish the SSE stream when mission completes or fails
+    if (data.type === 'COMPLETE' || data.type === 'ERROR') {
+      setTimeout(() => {
+        try {
+          res.end();
+        } catch (_) {}
+      }, 500);
+    }
   };
 
   session.listeners.push(listener);
@@ -115,7 +139,7 @@ app.get('/api/hunt/stream', (req: Request, res: Response) => {
  * Start Autonomous Deal Hunt
  */
 app.post('/api/hunt', async (req: Request, res: Response) => {
-  const { query, sessionId = 'default' } = req.body;
+  const { query, sessionId = `hunt-${Date.now()}` } = req.body;
 
   if (!query || typeof query !== 'string') {
     return res.status(400).json({ error: 'Please provide a valid query string.' });
@@ -126,50 +150,52 @@ app.post('/api/hunt', async (req: Request, res: Response) => {
   }
 
   const session = activeSessions.get(sessionId)!;
+  // Always clear any existing history for this session so each hunt is fresh
+  session.history = [];
 
   const broadcast = (data: any) => {
-    session.history.push(data);
+    const payload = { ...data, sessionId };
+    session.history.push(payload);
     for (const listener of session.listeners) {
-      listener(data);
+      listener(payload);
     }
   };
 
-  // Immediate acknowledgement
-  res.json({ status: 'started', sessionId, query });
+  try {
+    broadcast({
+      type: 'PROGRESS',
+      step: 'Wake Up',
+      message: `CouchScout Sloth activated for: "${query}". You can sit back now.`,
+      timestamp: new Date().toISOString(),
+    });
 
-  // Run autonomous workflow asynchronously while streaming progress
-  (async () => {
-    try {
+    const onProgress = (progress: SearchTaskProgress) => {
       broadcast({
         type: 'PROGRESS',
-        step: 'Wake Up',
-        message: `CouchScout Sloth activated for: "${query}". You can sit back now.`,
-        timestamp: new Date().toISOString(),
+        ...progress,
       });
+    };
 
-      const onProgress = (progress: SearchTaskProgress) => {
-        broadcast({
-          type: 'PROGRESS',
-          ...progress,
-        });
-      };
+    // Execute the autonomous workflow
+    const result = await workflowCoordinator.executeDealHunt(query, onProgress);
 
-      const result = await workflowCoordinator.executeDealHunt(query, onProgress);
+    broadcast({
+      type: 'COMPLETE',
+      result,
+      timestamp: new Date().toISOString(),
+    });
 
-      broadcast({
-        type: 'COMPLETE',
-        result,
-        timestamp: new Date().toISOString(),
-      });
-    } catch (err: any) {
-      console.error('Hunt execution error:', err);
-      broadcast({
-        type: 'ERROR',
-        error: err.message || 'Deal hunt encountered an issue',
-        timestamp: new Date().toISOString(),
-      });
-    }
-  })();
+    // Return the completed result directly in the HTTP response
+    return res.json({ status: 'completed', sessionId, query, result });
+  } catch (err: any) {
+    console.error('Hunt execution error:', err);
+    broadcast({
+      type: 'ERROR',
+      error: err.message || 'Deal hunt encountered an issue',
+      timestamp: new Date().toISOString(),
+    });
+    return res.status(500).json({ status: 'error', sessionId, error: err.message || 'Deal hunt failed' });
+  }
 });
 
 // Fallback to index.html for SPA routing
@@ -185,8 +211,8 @@ app.listen(PORT, () => {
    CouchScout Server is Live!
    URL: http://localhost:${PORT}
    Mode: ${config.nodeEnv}
-   Theme: "Slow and Steady" (International Sloth Day)
-   Prize Stack: Gemma + Stagehand + Temporal + Sentry + Render
+   Theme: "Slow and Steady" (Sloth Philosophy)
+   Tech Stack: Gemma + Stagehand + Temporal + Sentry + Render
 🦥 ========================================================
   `);
 });
